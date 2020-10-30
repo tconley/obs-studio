@@ -795,8 +795,35 @@ void OBSBasic::CreateProgramDisplay()
 
 void OBSBasic::TransitionClicked()
 {
-	if (previewProgramMode)
+	if (previewProgramMode) {
 		TransitionToScene(GetCurrentScene());
+		blog(LOG_INFO, "PROGRAM: Transitioning to scene '%s'",
+		     obs_source_get_name(GetCurrentSceneSource()));
+
+		delete programLabel;
+
+		programLabel = new QLabel(obs_source_get_name(GetCurrentSceneSource()), this);
+		programLabel->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+		programLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+		programLabel->setProperty("themeID", "previewProgramLabels");
+
+		//programWidget = new QWidget();
+		//programLayout = new QVBoxLayout();
+		programLayout->setContentsMargins(0, 0, 0, 0);
+		programLayout->setSpacing(0);
+		programLayout->addWidget(programLabel);
+		programLayout->addWidget(program);
+		bool labels = config_get_bool(GetGlobalConfig(), "BasicWindow","StudioModeLabels");
+		programLabel->setHidden(!labels);
+		programWidget->setLayout(programLayout);
+		ui->previewLayout->addWidget(programOptions);
+		ui->previewLayout->addWidget(programWidget);
+		ui->previewLayout->setAlignment(programOptions,Qt::AlignCenter);
+		
+
+
+
+	}
 }
 
 #define T_BAR_PRECISION 1024
@@ -1416,27 +1443,20 @@ void OBSBasic::SetPreviewProgramMode(bool enabled)
 		RefreshQuickTransitions();
 
 		programLabel = new QLabel(QTStr("StudioMode.Program"), this);
+		//programLabel = new QLabel(obs_source_get_name(GetCurrentSceneSource()), this);
 		programLabel->setSizePolicy(QSizePolicy::Preferred,
 					    QSizePolicy::Preferred);
 		programLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
 		programLabel->setProperty("themeID", "previewProgramLabels");
-
 		programWidget = new QWidget();
 		programLayout = new QVBoxLayout();
-
 		programLayout->setContentsMargins(0, 0, 0, 0);
 		programLayout->setSpacing(0);
-
 		programLayout->addWidget(programLabel);
 		programLayout->addWidget(program);
-
-		bool labels = config_get_bool(GetGlobalConfig(), "BasicWindow",
-					      "StudioModeLabels");
-
+		bool labels = config_get_bool(GetGlobalConfig(), "BasicWindow","StudioModeLabels");
 		programLabel->setHidden(!labels);
-
 		programWidget->setLayout(programLayout);
-
 		ui->previewLayout->addWidget(programOptions);
 		ui->previewLayout->addWidget(programWidget);
 		ui->previewLayout->setAlignment(programOptions,
